@@ -4,10 +4,10 @@ Module to provide ceph control with salt.
 
 :depends:   - ceph_cfg Python module
 
-.. versionadded:: Carbon
+.. versionadded:: 2016.11.0
 '''
 # Import Python Libs
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function, unicode_literals
 import logging
 
 
@@ -90,13 +90,12 @@ def partition_is(dev):
 
     .. code-block:: bash
 
-    salt '*' ceph.partition_is /dev/sdc1
-
+        salt '*' ceph.partition_is /dev/sdc1
     '''
     return ceph_cfg.partition_is(dev)
 
 
-def zap(dev=None, **kwargs):
+def zap(target=None, **kwargs):
     '''
     Destroy the partition table and content of a given disk.
 
@@ -106,29 +105,25 @@ def zap(dev=None, **kwargs):
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
 
-    Notes:
-
     dev
         The block device to format.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
 
     cluster_uuid
-        Set the cluster date will be added too. Defaults to the value found in
-        local config.
+        The cluster UUID. Defaults to value found in ceph config file.
     '''
-
-    if dev is not None:
+    if target is not None:
         log.warning("Depricated use of function, use kwargs")
-    dev = kwargs.get("dev", dev)
-    kwargs["dev"] = dev
+    target = kwargs.get("dev", target)
+    kwargs["dev"] = target
     return ceph_cfg.zap(**kwargs)
 
 
 def osd_prepare(**kwargs):
     '''
-    prepare an OSD
+    Prepare an OSD
 
     CLI Example:
 
@@ -141,19 +136,18 @@ def osd_prepare(**kwargs):
                 'osd_fs_type'='xfs' \\
                 'osd_uuid'='2a143b73-6d85-4389-a9e9-b8a78d9e1e07' \\
                 'journal_uuid'='4562a5db-ff6f-4268-811d-12fd4a09ae98'
-    Notes:
 
     cluster_uuid
-        Set the deivce to store the osd data on.
+        The device to store the osd data on.
 
     journal_dev
-        Set the journal device. defaults to osd_dev.
+        The journal device. defaults to osd_dev.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
 
     cluster_uuid
-        Set the cluster date will be added too. Defaults to the value found in local config.
+        The cluster date will be added too. Defaults to the value found in local config.
 
     osd_fs_type
         set the file system to store OSD data with. Defaults to "xfs".
@@ -192,18 +186,15 @@ def keyring_create(**kwargs):
                 'keyring_type'='admin' \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
-    keyring_type
-        Required paramter
-        Can be set to:
-            admin, mon, osd, rgw, mds
+    keyring_type (required)
+        One of ``admin``, ``mon``, ``osd``, ``rgw``, ``mds``
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.keyring_create(**kwargs)
 
@@ -219,20 +210,16 @@ def keyring_save(**kwargs):
         salt '*' ceph.keyring_save \\
                 'keyring_type'='admin' \\
                 'cluster_name'='ceph' \\
-                'cluster_uuid'='cluster_uuid' \\
-                ''
-    Notes:
+                'cluster_uuid'='cluster_uuid'
 
-    keyring_type
-        Required paramter
-        Can be set to:
-            admin, mon, osd, rgw, mds
+    keyring_type (required)
+        One of ``admin``, ``mon``, ``osd``, ``rgw``, ``mds``
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.keyring_save(**kwargs)
 
@@ -249,18 +236,15 @@ def keyring_purge(**kwargs):
                 'keyring_type'='admin' \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
-    keyring_type
-        Required paramter
-        Can be set to:
-            admin, mon, osd, rgw, mds
+    keyring_type (required)
+        One of ``admin``, ``mon``, ``osd``, ``rgw``, ``mds``
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
 
     If no ceph config file is found, this command will fail.
     '''
@@ -269,7 +253,7 @@ def keyring_purge(**kwargs):
 
 def keyring_present(**kwargs):
     '''
-    Is keyring on disk
+    Returns ``True`` if the keyring is present on disk, otherwise ``False``
 
     CLI Example:
 
@@ -279,25 +263,22 @@ def keyring_present(**kwargs):
                 'keyring_type'='admin' \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
-    keyring_type
-        Required paramter
-        Can be set to:
-            admin, mon, osd, rgw, mds
+    keyring_type (required)
+        One of ``admin``, ``mon``, ``osd``, ``rgw``, ``mds``
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.keyring_present(**kwargs)
 
 
 def keyring_auth_add(**kwargs):
     '''
-    Add keyring to authorised list
+    Add keyring to authorized list
 
     CLI Example:
 
@@ -307,18 +288,15 @@ def keyring_auth_add(**kwargs):
                 'keyring_type'='admin' \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
-    keyring_type
-        Required paramter
-        Can be set to:
-            admin, mon, osd, rgw, mds
+    keyring_type (required)
+        One of ``admin``, ``mon``, ``osd``, ``rgw``, ``mds``
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.keyring_auth_add(**kwargs)
 
@@ -335,25 +313,22 @@ def keyring_auth_del(**kwargs):
                 'keyring_type'='admin' \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
-    keyring_type
-        Required paramter
-        Can be set to:
-            admin, mon, osd, rgw, mds
+    keyring_type (required)
+        One of ``admin``, ``mon``, ``osd``, ``rgw``, ``mds``
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.keyring_auth_del(**kwargs)
 
 
 def mon_is(**kwargs):
     '''
-    Is this a mon node
+    Returns ``True`` if the target is a mon node, otherwise ``False``
 
     CLI Example:
 
@@ -362,20 +337,19 @@ def mon_is(**kwargs):
         salt '*' ceph.mon_is \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
     '''
     return ceph_cfg.mon_is(**kwargs)
 
 
 def mon_status(**kwargs):
     '''
-    Get status from mon deamon
+    Get status from mon daemon
 
     CLI Example:
 
@@ -384,20 +358,19 @@ def mon_status(**kwargs):
         salt '*' ceph.mon_status \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.status(**kwargs)
 
 
 def mon_quorum(**kwargs):
     '''
-    Is mon deamon in quorum
+    Returns ``True`` if the mon daemon is in the quorum, otherwise ``False``
 
     CLI Example:
 
@@ -406,20 +379,19 @@ def mon_quorum(**kwargs):
         salt '*' ceph.mon_quorum \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.mon_quorum(**kwargs)
 
 
 def mon_active(**kwargs):
     '''
-    Is mon deamon running
+    Returns ``True`` if the mon daemon is running, otherwise ``False``
 
     CLI Example:
 
@@ -428,13 +400,12 @@ def mon_active(**kwargs):
         salt '*' ceph.mon_active \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.mon_active(**kwargs)
 
@@ -450,13 +421,12 @@ def mon_create(**kwargs):
         salt '*' ceph.mon_create \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.mon_create(**kwargs)
 
@@ -471,13 +441,11 @@ def rgw_pools_create(**kwargs):
 
         salt '*' ceph.rgw_pools_create
 
-    Notes:
-
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.rgw_pools_create(**kwargs)
 
@@ -492,13 +460,11 @@ def rgw_pools_missing(**kwargs):
 
         salt '*' ceph.rgw_pools_missing
 
-    Notes:
-
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.rgw_pools_missing(**kwargs)
 
@@ -516,17 +482,14 @@ def rgw_create(**kwargs):
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
 
-    Notes:
-
-    name:
-        Required paramter
-        Set the rgw client name. Must start with 'rgw.'
+    name (required)
+        The RGW client name. Must start with ``rgw.``
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.rgw_create(**kwargs)
 
@@ -544,17 +507,14 @@ def rgw_destroy(**kwargs):
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
 
-    Notes:
-
-    name:
-        Required paramter
-        Set the rgw client name. Must start with 'rgw.'
+    name (required)
+        The RGW client name (must start with ``rgw.``)
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.rgw_destroy(**kwargs)
 
@@ -574,25 +534,20 @@ def mds_create(**kwargs):
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
 
-    Notes:
+    name (required)
+        The MDS name (must start with ``mds.``)
 
-    name:
-        Required paramter
-        Set the rgw client name. Must start with 'mds.'
+    port (required)
+        Port to which the MDS will listen
 
-    port:
-        Required paramter
-        Port for the mds to listen to.
-
-    addr:
-        Required paramter
-        Address or IP address for the mds to listen to.
+    addr (required)
+        Address or IP address for the MDS to listen
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.mds_create(**kwargs)
 
@@ -610,17 +565,14 @@ def mds_destroy(**kwargs):
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
 
-    Notes:
-
-    name:
-        Required paramter
-        Set the rgw client name. Must start with 'mds.'
+    name (required)
+        The MDS name (must start with ``mds.``)
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.mds_destroy(**kwargs)
 
@@ -636,13 +588,12 @@ def keyring_auth_list(**kwargs):
         salt '*' ceph.keyring_auth_list \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
     '''
     return ceph_cfg.keyring_auth_list(**kwargs)
 
@@ -658,13 +609,12 @@ def pool_list(**kwargs):
         salt '*' ceph.pool_list \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
     '''
     return ceph_cfg.pool_list(**kwargs)
 
@@ -680,13 +630,12 @@ def pool_add(pool_name, **kwargs):
         salt '*' ceph.pool_add pool_name \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     pg_num
         Default to 8
@@ -698,10 +647,10 @@ def pool_add(pool_name, **kwargs):
         can take values "replicated" or "erasure"
 
     erasure_code_profile
-        Set the "erasure_code_profile"
+        The "erasure_code_profile"
 
     crush_ruleset
-        Set the crush map rule set
+        The crush map rule set
     '''
     return ceph_cfg.pool_add(pool_name, **kwargs)
 
@@ -717,13 +666,12 @@ def pool_del(pool_name, **kwargs):
         salt '*' ceph.pool_del pool_name \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
     '''
     return ceph_cfg.pool_del(pool_name, **kwargs)
 
@@ -740,13 +688,11 @@ def purge(**kwargs):
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
 
-    Notes:
-
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
     '''
     return ceph_cfg.purge(**kwargs)
 
@@ -754,6 +700,12 @@ def purge(**kwargs):
 def ceph_version():
     '''
     Get the version of ceph installed
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' ceph.ceph_version
     '''
     return ceph_cfg.ceph_version()
 
@@ -769,26 +721,19 @@ def cluster_quorum(**kwargs):
         salt '*' ceph.cluster_quorum \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
-    Get the cluster quorum status.
-
-    Scope:
-    Cluster wide
-
-    Arguments:
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.cluster_quorum(**kwargs)
 
 
 def cluster_status(**kwargs):
     '''
-    Get the cluster status
+    Get the cluster status, including health if in quorum
 
     CLI Example:
 
@@ -797,18 +742,11 @@ def cluster_status(**kwargs):
         salt '*' ceph.cluster_status \\
                 'cluster_name'='ceph' \\
                 'cluster_uuid'='cluster_uuid'
-    Notes:
-    Get the cluster status including health if in quorum.
-
-    Scope:
-    Cluster wide
-
-    Arguments:
 
     cluster_uuid
-        Set the cluster UUID. Defaults to value found in ceph config file.
+        The cluster UUID. Defaults to value found in ceph config file.
 
     cluster_name
-        Set the cluster name. Defaults to "ceph".
+        The cluster name. Defaults to ``ceph``.
     '''
     return ceph_cfg.cluster_status(**kwargs)

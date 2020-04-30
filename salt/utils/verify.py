@@ -26,6 +26,7 @@ from salt.log import is_console_configured
 from salt.exceptions import SaltClientError
 import salt.defaults.exitcodes
 import salt.utils
+import salt.ext.six
 
 log = logging.getLogger(__name__)
 
@@ -457,17 +458,19 @@ def clean_path(root, path, subdir=False):
     under said root. Pass in subdir=True if the path can result in a
     subdirectory of the root instead of having to reside directly in the root
     '''
-    if not os.path.isabs(root):
+    real_root = os.path.realpath(root)
+    if not os.path.isabs(real_root):
         return ''
     if not os.path.isabs(path):
         path = os.path.join(root, path)
     path = os.path.normpath(path)
+    real_path = os.path.realpath(path)
     if subdir:
-        if path.startswith(root):
-            return path
+        if real_path.startswith(real_root):
+            return real_path
     else:
-        if os.path.dirname(path) == os.path.normpath(root):
-            return path
+        if os.path.dirname(real_path) == os.path.normpath(real_root):
+            return real_path
     return ''
 
 

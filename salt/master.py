@@ -906,9 +906,10 @@ class MWorker(SignalHandlingMultiprocessingProcess):
                  the command specified in the load's 'cmd' key.
         '''
         log.trace('Clear payload received with command {cmd}'.format(**load))
-        if load['cmd'].startswith('__'):
-            return False
-        return getattr(self.clear_funcs, load['cmd'])(load), {'fun': 'send_clear'}
+        method = self.clear_funcs.get_method(load['cmd'])
+        if not method:
+            return {}, {'fun': 'send_clear'}
+        return method(load), {'fun': 'send_clear'}
 
     def _handle_aes(self, data):
         '''
@@ -922,8 +923,9 @@ class MWorker(SignalHandlingMultiprocessingProcess):
             log.error('Received malformed command {0}'.format(data))
             return {}
         log.trace('AES payload received with command {0}'.format(data['cmd']))
-        if data['cmd'].startswith('__'):
-            return False
+        method = self.aes_funcs.get_method(data['cmd'])
+        if not method:
+            return {}, {'fun': 'send'}
         return self.aes_funcs.run_func(data['cmd'], data)
 
     def run(self):
@@ -940,13 +942,44 @@ class MWorker(SignalHandlingMultiprocessingProcess):
         self.__bind()
 
 
+class TransportMethods(object):
+    '''
+    Expose methods to the transport layer, methods with their names found in
+    the class attribute 'expose_methods' will be exposed to the transport layer
+    via 'get_method'.
+    '''
+
+    expose_methods = ()
+
+    def get_method(self, name):
+        '''
+        Get a method which should be exposed to the transport layer
+        '''
+        if name in self.expose_methods:
+            try:
+                return getattr(self, name)
+            except AttributeError:
+                log.error("Expose method not found: %s", name)
+        else:
+            log.error("Requested method not exposed: %s", name)
+
+
 # TODO: rename? No longer tied to "AES", just "encrypted" or "private" requests
-class AESFuncs(object):
+class AESFuncs(TransportMethods):
     '''
     Set up functions that are available when the load is encrypted with AES
     '''
-    # The AES Functions:
-    #
+
+    expose_methods = (
+        'verify_minion', '_master_tops', '_ext_nodes', '_master_opts',
+        '_mine_get', '_mine', '_mine_delete', '_mine_flush', '_file_recv',
+        '_pillar', '_minion_event', '_handle_minion_event', '_return',
+        '_syndic_return', '_minion_runner', 'pub_ret', 'minion_pub',
+        'minion_publish', 'revoke_auth', 'run_func', '_serve_file',
+        '_file_find', '_file_hash', '_file_find_and_stat', '_file_list',
+        '_file_list_emptydirs', '_dir_list', '_symlink_list', '_file_envs',
+    )
+
     def __init__(self, opts):
         '''
         Create a new AESFuncs
@@ -1660,11 +1693,18 @@ class AESFuncs(object):
         return ret, {'fun': 'send'}
 
 
-class ClearFuncs(object):
+class ClearFuncs(TransportMethods):
     '''
     Set up functions that are safe to execute when commands sent to the master
     without encryption and authentication
     '''
+
+    # These methods will be exposed to the transport layer by
+    # MWorker._handle_clear
+    expose_methods = (
+        'ping', 'publish', 'get_token', 'mk_token', 'wheel', 'runner',
+    )
+
     # The ClearFuncs object encapsulates the functions that can be executed in
     # the clear:
     # publish (The publish from the LocalClient)

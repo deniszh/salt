@@ -805,8 +805,8 @@ class MWorker(multiprocessing.Process):
         log.trace('Clear payload received with command {cmd}'.format(**load))
         method = self.clear_funcs.get_method(load['cmd'])
         if not method:
-            return {}
-        return method(load)
+            return {}, {'fun': 'send_clear'}
+        return return method(load), {'fun': 'send_clear'}
 
     def _handle_aes(self, load):
         '''
@@ -828,7 +828,7 @@ class MWorker(multiprocessing.Process):
         log.trace('AES payload received with command {0}'.format(data['cmd']))
         method = self.aes_funcs.get_method(data['cmd'])
         if not method:
-            return {}
+            return {}, {'fun': 'send'}
         return self.aes_funcs.run_func(data['cmd'], data)
 
     def _update_aes(self):

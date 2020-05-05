@@ -30,6 +30,7 @@ import salt.config
 import salt.loader
 import salt.utils
 import salt.utils.minions
+import salt.utils.verify
 import salt.payload
 
 log = logging.getLogger(__name__)
@@ -147,6 +148,8 @@ class LoadAuth(object):
         hash_type = getattr(hashlib, self.opts.get('hash_type', 'md5'))
         tok = str(hash_type(os.urandom(512)).hexdigest())
         t_path = os.path.join(self.opts['token_dir'], tok)
+        if not salt.utils.verify.clean_path(self.opts['token_dir'], t_path):
+            return {}
         while os.path.isfile(t_path):
             tok = str(hash_type(os.urandom(512)).hexdigest())
             t_path = os.path.join(self.opts['token_dir'], tok)

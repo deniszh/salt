@@ -452,19 +452,63 @@ def check_max_open_files(opts):
     log.log(level=level, msg=msg)
 
 
+def _realpath_darwin(path):
+    base = ''
+    for part in path.split(os.path.sep)[1:]:
+        if base != '':
+            if os.path.islink(os.path.sep.join([base, part])):
+                base = os.readlink(os.path.sep.join([base, part]))
+            else:
+                base = os.path.abspath(os.path.sep.join([base, part]))
+        else:
+            base = os.path.abspath(os.path.sep.join([base, part]))
+    return base
+
+
+def _realpath_windows(path):
+    base = ''
+    for part in path.split(os.path.sep):
+        if base != '':
+            try:
+                part = os.readlink(os.path.sep.join([base, part]))
+                base = os.path.abspath(part)
+            except OSError:
+                base = os.path.abspath(os.path.sep.join([base, part]))
+        else:
+            base = part
+    return base
+
+
+def _realpath(path):
+    '''
+    Cross platform realpath method. On Windows when python 3, this method
+    uses the os.readlink method to resolve any filesystem links. On Windows
+    when python 2, this method is a no-op. All other platforms and version use
+    os.path.realpath
+    '''
+    if salt.utils.is_darwin():
+        return _realpath_darwin(path)
+    elif salt.utils.is_windows():
+        if salt.ext.six.PY3:
+            return _realpath_windows(path)
+        else:
+            return path
+    return os.path.realpath(path)
+
+
 def clean_path(root, path, subdir=False):
     '''
     Accepts the root the path needs to be under and verifies that the path is
     under said root. Pass in subdir=True if the path can result in a
     subdirectory of the root instead of having to reside directly in the root
     '''
-    real_root = os.path.realpath(root)
+    real_root = _realpath(root)
     if not os.path.isabs(real_root):
         return ''
     if not os.path.isabs(path):
         path = os.path.join(root, path)
     path = os.path.normpath(path)
-    real_path = os.path.realpath(path)
+    real_path = _realpath(path)
     if subdir:
         if real_path.startswith(real_root):
             return real_path

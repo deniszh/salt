@@ -203,6 +203,8 @@ class LoadAuth(object):
         not valid
         '''
         t_path = os.path.join(self.opts['token_dir'], tok)
+        if not salt.utils.verify.clean_path(self.opts['token_dir'], t_path):
+            return {}
         if not os.path.isfile(t_path):
             return {}
         with salt.utils.fopen(t_path, 'rb') as fp_:

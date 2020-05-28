@@ -12,6 +12,7 @@ import os
 import yaml
 
 # Import salt libs
+import salt.utils.verify
 import salt.config
 
 log = logging.getLogger(__name__)
@@ -80,6 +81,8 @@ def update_config(file_name, yaml_contents):
             os.makedirs(dir_path, 0o755)
 
         file_path = os.path.join(dir_path, file_name)
+        if not salt.utils.verify.clean_path(dir_path, file_path):
+            return 'Invalid path'
         with salt.utils.fopen(file_path, 'w') as fp_:
             fp_.write(yaml_out)
 
